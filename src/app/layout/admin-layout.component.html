@@ -1,0 +1,75 @@
+<mat-sidenav-container class="admin-shell" autosize>
+  <mat-sidenav
+    #sidenav
+    class="admin-sidenav"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+  >
+    <div class="sidenav-inner">
+      <a class="admin-brand" routerLink="/admin" (click)="closeOnMobile()">
+        <img src="favicon.svg" alt="" width="38" height="38" />
+        <span>
+          <strong>TourApp</strong>
+          <small>Administración</small>
+        </span>
+      </a>
+
+      <nav class="admin-nav" aria-label="Navegación administrativa">
+        @for (section of sections; track section.title) {
+          <div class="nav-section">
+            <span class="nav-title">{{ section.title }}</span>
+            @for (item of section.items; track item.path) {
+              <a
+                class="nav-item"
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                (click)="closeOnMobile()"
+              >
+                <mat-icon>{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      </nav>
+
+      <div class="sidenav-foot">
+        <a class="site-link" routerLink="/">
+          <mat-icon>open_in_new</mat-icon>
+          <span>Ver sitio público</span>
+        </a>
+        <div class="admin-user">
+          <span class="avatar">TA</span>
+          <div>
+            <strong>Equipo TourApp</strong>
+            <small>Operaciones</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin-main">
+    <mat-toolbar class="admin-toolbar">
+      <button mat-icon-button type="button" aria-label="Abrir menú" (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="toolbar-title">Centro de operaciones</span>
+
+      <span class="spacer"></span>
+
+      <a mat-stroked-button class="view-site" routerLink="/">
+        <mat-icon>travel_explore</mat-icon>
+        Ver sitio
+      </a>
+
+      <span class="toolbar-avatar" title="Equipo TourApp">TA</span>
+    </mat-toolbar>
+
+    <div class="admin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,131 @@
+<section class="catalog-hero">
+  <img src="img/cusco.jpg" alt="Vista de Cusco entre montañas" />
+  <div class="catalog-overlay"></div>
+  <div class="container catalog-hero-inner">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a routerLink="/">Inicio</a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>Tours</span>
+    </nav>
+
+    <span class="eyebrow eyebrow--light">Catálogo TourApp</span>
+    <h1>Experiencias para<br /><em>viajar distinto.</em></h1>
+    <p>
+      Rutas de un día y escapadas cuidadas. Encuentra la experiencia que se parezca a la forma en
+      que quieres recordar el Perú.
+    </p>
+  </div>
+</section>
+
+<div class="container filters-wrap">
+  <div class="filters-card">
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Buscar por tour o lugar</mat-label>
+      <input matInput [value]="query()" (input)="setQuery($any($event.target).value)" />
+    </mat-form-field>
+
+    <div class="duration-chips">
+      @for (option of durationOptions; track option.value) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="duration() === option.value"
+          (click)="setDuration(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
+    <mat-form-field appearance="outline" class="sort-field" subscriptSizing="dynamic">
+      <mat-label>Ordenar por</mat-label>
+      <mat-select [value]="sortBy()" (selectionChange)="sortBy.set($event.value)">
+        <mat-option value="recommended">Recomendados</mat-option>
+        <mat-option value="price-asc">Precio: menor a mayor</mat-option>
+        <mat-option value="price-desc">Precio: mayor a menor</mat-option>
+        <mat-option value="duration-asc">Duración: menor a mayor</mat-option>
+        <mat-option value="name">Nombre (A-Z)</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<section class="catalog-body">
+  <div class="container">
+    @if (demoMode()) {
+      <div class="notice">
+        <mat-icon>info</mat-icon>
+        <div>
+          <strong>Catálogo de demostración</strong>
+          <p>
+            No se pudo conectar con la API o todavía no hay tours publicados. Los tours mostrados
+            son ejemplos para que puedas recorrer la interfaz.
+          </p>
+        </div>
+      </div>
+    }
+
+    <div class="results-head">
+      <div>
+        <h2>{{ filteredTours().length }} experiencias encontradas</h2>
+        <p>
+          @if (query().trim()) {
+            Resultados para “{{ query() }}”
+          } @else {
+            Tours disponibles para tu próxima salida
+          }
+        </p>
+      </div>
+
+      @if (hasFilters()) {
+        <button type="button" class="clear-button" (click)="clearFilters()">
+          <mat-icon>filter_alt_off</mat-icon>
+          Limpiar filtros
+        </button>
+      }
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+      <div class="tours-grid">
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div class="skeleton-card">
+            <div class="skeleton-media"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredTours().length) {
+      <div class="tours-grid">
+        @for (tour of filteredTours(); track tour.idTour) {
+          <app-tour-card [tour]="tour"></app-tour-card>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>travel_explore</mat-icon>
+        <h3>No encontramos tours con esos filtros</h3>
+        <p>
+          Prueba con otra palabra, amplía la duración o limpia los filtros para ver todo el
+          catálogo.
+        </p>
+        <button type="button" class="btn btn-primary" (click)="clearFilters()">
+          Ver todos los tours
+        </button>
+      </div>
+    }
+
+    <div class="catalog-note">
+      <span class="note-icon"><mat-icon>tips_and_updates</mat-icon></span>
+      <div>
+        <strong>¿No encuentras lo que buscas?</strong>
+        <p>
+          Armamos rutas privadas para familias, grupos de amigos y equipos.
+          <a href="mailto:hola@tourapp.pe">Cuéntanos tu idea</a> y la diseñamos contigo.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

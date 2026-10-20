@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+h2 {
+  margin: 0 0 4px;
+  color: var(--brand-900);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+}
+
+.dialog-subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+mat-dialog-content {
+  padding-top: 8px !important;
+  max-height: min(68vh, 620px);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  padding-top: 6px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.checkbox-field {
+  grid-column: span 2;
+  margin-block: 6px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding-block: 12px 20px !important;
+}
+
+.save-button {
+  background: var(--brand-900) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2,
+  .checkbox-field {
+    grid-column: span 1;
+  }
+}

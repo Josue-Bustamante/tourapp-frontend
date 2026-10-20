@@ -1,0 +1,412 @@
+<div class="container reservation-page">
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <p>Preparando tu reserva…</p>
+    </div>
+  } @else if (notFound() || !tour()) {
+    <div class="empty-state not-found">
+      <mat-icon>confirmation_number</mat-icon>
+      <h3>No encontramos esa experiencia</h3>
+      <p>El tour no existe o ya no está disponible. Vuelve al catálogo para elegir otra ruta.</p>
+      <a class="btn btn-primary" routerLink="/tours">Volver al catálogo</a>
+    </div>
+  } @else if (confirmation(); as done) {
+    <section class="success-wrap">
+      <div class="success-card">
+        <span class="success-icon"><mat-icon>check</mat-icon></span>
+        <span class="eyebrow">Reserva confirmada</span>
+        <h1>¡Nos vemos en el camino!</h1>
+        <p class="success-lead">
+          Tu reserva quedó registrada. Guarda el código y presenta tus datos el día de la salida.
+        </p>
+
+        <div class="code-box">
+          <span>Código de reserva</span>
+          <strong>{{ done.code }}</strong>
+        </div>
+
+        <div class="success-details">
+          <div>
+            <span>Experiencia</span>
+            <strong>{{ done.tourName }}</strong>
+          </div>
+          <div>
+            <span>Salida</span>
+            <strong>{{ done.date | fecha }} · {{ done.time | hora }}</strong>
+          </div>
+          <div>
+            <span>Viajeros</span>
+            <strong
+              >{{ done.travelers }} {{ done.travelers === 1 ? 'viajero' : 'viajeros' }}</strong
+            >
+          </div>
+          <div>
+            <span>Titular</span>
+            <strong>{{ done.clientName }}</strong>
+          </div>
+          <div class="detail-total">
+            <span>Total</span>
+            <strong>{{ done.total | money }}</strong>
+          </div>
+        </div>
+
+        @if (done.demo) {
+          <div class="notice">
+            <mat-icon>info</mat-icon>
+            <div>
+              <strong>Reserva de demostración</strong>
+              <p>
+                El backend no está conectado, así que esta reserva no se guardó en la base de datos.
+                Al iniciar Spring Boot podrás completar el proceso real.
+              </p>
+            </div>
+          </div>
+        }
+
+        <div class="success-actions">
+          <a class="btn btn-primary" routerLink="/tours">
+            <mat-icon>travel_explore</mat-icon>
+            Explorar más tours
+          </a>
+          <a class="btn btn-outline" routerLink="/">
+            <mat-icon>home</mat-icon>
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    </section>
+  } @else {
+    @if (tour(); as currentTour) {
+      <header class="reservation-head">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <a routerLink="/">Inicio</a>
+          <mat-icon>chevron_right</mat-icon>
+          <a routerLink="/tours">Tours</a>
+          <mat-icon>chevron_right</mat-icon>
+          <a [routerLink]="['/tours', currentTour.idTour]">{{ currentTour.nameTour }}</a>
+          <mat-icon>chevron_right</mat-icon>
+          <span>Reserva</span>
+        </nav>
+
+        <span class="eyebrow">Reserva tu experiencia</span>
+        <h1>Unos pocos datos y<br /><em>nos vamos.</em></h1>
+        <p class="head-sub">
+          Elige tu fecha, cuéntanos quién viaja y confirma. No se realiza ningún cobro en este paso.
+        </p>
+      </header>
+
+      @if (isDemo()) {
+        <div class="notice">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Estás en modo demostración</strong>
+            <p>
+              No hay conexión con la API o la base de datos está vacía. Puedes recorrer el flujo
+              completo; la reserva final será simulada.
+            </p>
+          </div>
+        </div>
+      }
+
+      @if (!hasTrips()) {
+        <div class="notice notice--error">
+          <mat-icon>event_busy</mat-icon>
+          <div>
+            <strong>No hay salidas programadas</strong>
+            <p>
+              Este tour todavía no tiene viajes creados. Escríbenos a
+              <a href="mailto:hola@tourapp.pe">hola@tourapp.pe</a> y coordinamos una fecha.
+            </p>
+          </div>
+        </div>
+      }
+
+      @if (!isDemo() && !hasUsers()) {
+        <div class="notice notice--error">
+          <mat-icon>manage_accounts</mat-icon>
+          <div>
+            <strong>Falta un usuario del sistema</strong>
+            <p>
+              Las reservas se asocian a un usuario. Crea al menos uno desde el
+              <a routerLink="/admin/users">panel administrativo</a> para completar el proceso.
+            </p>
+          </div>
+        </div>
+      }
+
+      <div class="reservation-grid">
+        <form
+          class="reservation-form"
+          [formGroup]="form"
+          (submit)="$event.preventDefault(); submit()"
+        >
+          <section class="form-card">
+            <header class="step-head">
+              <span class="step-number">01</span>
+              <div>
+                <h2>Elige tu salida</h2>
+                <p>Selecciona la fecha y cuántas personas viajan.</p>
+              </div>
+            </header>
+
+            <div class="step-body">
+              @if (hasTrips()) {
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Fecha de salida</mat-label>
+                  <mat-select formControlName="idTrip">
+                    @for (trip of trips(); track trip.idTrip) {
+                      <mat-option [value]="trip.idTrip">
+                        {{ trip.tripDate | fecha }} · {{ trip.departureTime | hora }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-icon matPrefix>calendar_month</mat-icon>
+                </mat-form-field>
+              }
+
+              <div class="travelers-box">
+                <div>
+                  <strong>Viajeros</strong>
+                  <span>Máximo 10 personas por reserva</span>
+                </div>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    aria-label="Quitar viajero"
+                    (click)="changeTravelers(-1)"
+                    [disabled]="travelers() <= 1"
+                  >
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span>{{ travelers() }}</span>
+                  <button
+                    type="button"
+                    aria-label="Agregar viajero"
+                    (click)="changeTravelers(1)"
+                    [disabled]="travelers() >= 10"
+                  >
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card">
+            <header class="step-head">
+              <span class="step-number">02</span>
+              <div>
+                <h2>Datos del viajero</h2>
+                <p>¿Ya viajaste con nosotros o es tu primera vez?</p>
+              </div>
+            </header>
+
+            <div class="step-body">
+              <div class="mode-toggle" role="group" aria-label="Tipo de cliente">
+                <button
+                  type="button"
+                  [class.active]="form.controls.mode.value === 'existing'"
+                  [disabled]="!clients().length"
+                  (click)="modeChanged('existing')"
+                >
+                  <mat-icon>person_search</mat-icon>
+                  Ya soy cliente
+                </button>
+                <button
+                  type="button"
+                  [class.active]="form.controls.mode.value === 'new'"
+                  (click)="modeChanged('new')"
+                >
+                  <mat-icon>person_add</mat-icon>
+                  Soy nuevo
+                </button>
+              </div>
+
+              @if (form.controls.mode.value === 'existing') {
+                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                  <mat-label>Selecciona tu ficha</mat-label>
+                  <mat-select formControlName="idClient">
+                    @for (client of clients(); track client.idClient) {
+                      <mat-option [value]="client.idClient">
+                        {{ client.firstName }} {{ client.lastName }} · {{ client.dni }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (showError('idClient')) {
+                    <mat-error>{{ showError('idClient') }}</mat-error>
+                  }
+                </mat-form-field>
+              } @else {
+                <p class="form-hint">
+                  <mat-icon>info</mat-icon>
+                  Crearemos tu ficha de cliente con estos datos al confirmar la reserva.
+                </p>
+
+                <div class="fields-grid">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Nombres</mat-label>
+                    <input matInput formControlName="firstName" autocomplete="given-name" />
+                    @if (showError('firstName')) {
+                      <mat-error>{{ showError('firstName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Apellidos</mat-label>
+                    <input matInput formControlName="lastName" autocomplete="family-name" />
+                    @if (showError('lastName')) {
+                      <mat-error>{{ showError('lastName') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>DNI o documento</mat-label>
+                    <input matInput formControlName="dni" autocomplete="off" />
+                    @if (showError('dni')) {
+                      <mat-error>{{ showError('dni') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput type="email" formControlName="email" autocomplete="email" />
+                    @if (showError('email')) {
+                      <mat-error>{{ showError('email') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Teléfono (opcional)</mat-label>
+                    <input matInput formControlName="phoneNumberClient" autocomplete="tel" />
+                    @if (showError('phoneNumberClient')) {
+                      <mat-error>{{ showError('phoneNumberClient') }}</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Dirección (opcional)</mat-label>
+                    <input matInput formControlName="address" autocomplete="street-address" />
+                    @if (showError('address')) {
+                      <mat-error>{{ showError('address') }}</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              }
+            </div>
+          </section>
+
+          @if (!isDemo()) {
+            <section class="form-card">
+              <header class="step-head">
+                <span class="step-number">03</span>
+                <div>
+                  <h2>Usuario asociado</h2>
+                  <p>La reserva se registra a nombre de un usuario del sistema.</p>
+                </div>
+              </header>
+
+              <div class="step-body">
+                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                  <mat-label>Usuario</mat-label>
+                  <mat-select formControlName="idUser">
+                    @for (user of enabledUsers(); track user.idUser) {
+                      <mat-option [value]="user.idUser">{{ user.nameUser }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (showError('idUser')) {
+                    <mat-error>{{ showError('idUser') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </section>
+          }
+
+          <button
+            type="submit"
+            class="btn btn-accent btn-lg submit-button"
+            [disabled]="submitting() || !hasTrips() || (!isDemo() && !hasUsers())"
+          >
+            @if (submitting()) {
+              <mat-icon class="spin">progress_activity</mat-icon>
+              Procesando…
+            } @else {
+              <mat-icon>check_circle</mat-icon>
+              {{ isDemo() ? 'Simular reserva' : 'Confirmar reserva' }}
+            }
+          </button>
+
+          <p class="form-foot">
+            <mat-icon>lock</mat-icon>
+            Tus datos se usan únicamente para gestionar la reserva.
+          </p>
+        </form>
+
+        <aside class="summary-aside">
+          <div class="summary-card">
+            <div class="summary-media">
+              <img [src]="image()" [alt]="currentTour.nameTour" />
+              @if (currentTour.demo) {
+                <span class="chip chip-glass summary-demo">Demo</span>
+              }
+            </div>
+
+            <div class="summary-body">
+              <span class="summary-eyebrow">Tu experiencia</span>
+              <h3>{{ currentTour.nameTour }}</h3>
+
+              <div class="summary-meta">
+                <span
+                  ><mat-icon>schedule</mat-icon> {{ currentTour.durationHours | duracion }}</span
+                >
+                <span><mat-icon>star</mat-icon> 4.9 · 128 opiniones</span>
+              </div>
+
+              <div class="summary-lines">
+                <div>
+                  <span>Salida</span>
+                  <strong>
+                    @if (selectedTrip(); as trip) {
+                      {{ trip.tripDate | fecha }} · {{ trip.departureTime | hora }}
+                    } @else {
+                      Por definir
+                    }
+                  </strong>
+                </div>
+                <div>
+                  <span>Viajeros</span>
+                  <strong>{{ travelers() }}</strong>
+                </div>
+                <div>
+                  <span>Precio por persona</span>
+                  <strong>{{ unitPrice() | money }}</strong>
+                </div>
+              </div>
+
+              <div class="summary-total">
+                <span>Total</span>
+                <strong>{{ total() | money }}</strong>
+              </div>
+
+              <p class="summary-note">
+                <mat-icon>verified_user</mat-icon>
+                Cancelación gratuita hasta 48 h antes de la salida.
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <span class="help-icon"><mat-icon>support_agent</mat-icon></span>
+            <div>
+              <strong>¿Necesitas ayuda?</strong>
+              <p>
+                Escríbenos a <a href="mailto:hola@tourapp.pe">hola@tourapp.pe</a> o llámanos al +51
+                84 123 4567.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  }
+</div>

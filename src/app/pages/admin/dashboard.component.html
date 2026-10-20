@@ -1,0 +1,215 @@
+<section class="dashboard">
+  <header class="welcome">
+    <div class="welcome-copy">
+      <span class="eyebrow">Panel TourApp</span>
+      <h1>Todo listo para la<br /><em>próxima salida.</em></h1>
+      <p>{{ todayLabel }}</p>
+    </div>
+
+    <div class="welcome-actions">
+      <a class="btn btn-outline" routerLink="/admin/bookings">
+        <mat-icon>confirmation_number</mat-icon>
+        Ver reservas
+      </a>
+      <a class="btn btn-primary" routerLink="/admin/tours">
+        <mat-icon>add</mat-icon>
+        Nuevo tour
+      </a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+  }
+
+  @if (error()) {
+    <div class="notice notice--error">
+      <mat-icon>cloud_off</mat-icon>
+      <div>
+        <strong>Sin conexión con la API</strong>
+        <p>{{ error() }}</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="load()">Reintentar</button>
+    </div>
+  }
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-icon stat-icon--green"><mat-icon>travel_explore</mat-icon></span>
+      <div class="stat-copy">
+        <span>Tours publicados</span>
+        <strong>{{ tours().length }}</strong>
+        <small>{{ trips().length }} viajes programados</small>
+      </div>
+      <a class="stat-link" routerLink="/admin/tours"><mat-icon>arrow_forward</mat-icon></a>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon stat-icon--orange"><mat-icon>confirmation_number</mat-icon></span>
+      <div class="stat-copy">
+        <span>Reservas</span>
+        <strong>{{ bookings().length }}</strong>
+        <small>{{ revenue() | money }} en ingresos</small>
+      </div>
+      <a class="stat-link" routerLink="/admin/bookings"><mat-icon>arrow_forward</mat-icon></a>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon stat-icon--blue"><mat-icon>groups</mat-icon></span>
+      <div class="stat-copy">
+        <span>Clientes</span>
+        <strong>{{ clients().length }}</strong>
+        <small>Fichas registradas</small>
+      </div>
+      <a class="stat-link" routerLink="/admin/clients"><mat-icon>arrow_forward</mat-icon></a>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon stat-icon--sand"><mat-icon>badge</mat-icon></span>
+      <div class="stat-copy">
+        <span>Equipo</span>
+        <strong>{{ guides().length + drivers().length }}</strong>
+        <small>{{ guides().length }} guías · {{ drivers().length }} conductores</small>
+      </div>
+      <a class="stat-link" routerLink="/admin/guides"><mat-icon>arrow_forward</mat-icon></a>
+    </article>
+  </div>
+
+  <div class="middle-grid">
+    <article class="panel chart-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Reservas por mes</h2>
+          <p>Últimos seis meses de actividad</p>
+        </div>
+        <span class="pill pill-muted">{{ bookings().length }} en total</span>
+      </div>
+
+      <div class="chart">
+        @for (bar of monthlyBars(); track bar.label) {
+          <div class="chart-col">
+            <span class="chart-value">{{ bar.count }}</span>
+            <div class="chart-track">
+              <span class="chart-bar" [style.height.%]="bar.height"></span>
+            </div>
+            <span class="chart-label">{{ bar.label }}</span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel revenue-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Ingresos</h2>
+          <p>Total registrado en reservas</p>
+        </div>
+        <span class="stat-icon stat-icon--green"><mat-icon>payments</mat-icon></span>
+      </div>
+
+      <strong class="revenue-value">{{ revenue() | money }}</strong>
+
+      <div class="revenue-lines">
+        <div>
+          <span>Ticket promedio</span>
+          <strong>{{ averageTicket() | money }}</strong>
+        </div>
+        <div>
+          <span>Reservas activas</span>
+          <strong>{{ bookings().length }}</strong>
+        </div>
+        <div>
+          <span>Usuarios del sistema</span>
+          <strong>{{ users().length }}</strong>
+        </div>
+      </div>
+
+      <a class="text-link" routerLink="/admin/bookings">
+        Revisar todas las reservas
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </article>
+  </div>
+
+  <div class="lists-grid">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Próximas salidas</h2>
+          <p>Los viajes más cercanos</p>
+        </div>
+        <a class="text-link" routerLink="/admin/trips">Ver todos</a>
+      </div>
+
+      @if (upcomingTrips().length) {
+        <div class="list">
+          @for (trip of upcomingTrips(); track trip.idTrip) {
+            <div class="list-row">
+              <span class="date-block">
+                <strong>{{ trip.tripDate | fecha }}</strong>
+                <small>{{ trip.departureTime | hora }}</small>
+              </span>
+              <div class="list-copy">
+                <strong>{{ tourName(trip.idTour) }}</strong>
+                <small>Guía: {{ guideName(trip.idGuide) }}</small>
+              </div>
+              <span class="chip chip-sand">#{{ trip.idTrip }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="mini-empty">
+          <mat-icon>event_available</mat-icon>
+          <p>No hay viajes próximos programados.</p>
+          <a routerLink="/admin/trips">Programar una salida</a>
+        </div>
+      }
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Reservas recientes</h2>
+          <p>Últimos movimientos</p>
+        </div>
+        <a class="text-link" routerLink="/admin/bookings">Ver todas</a>
+      </div>
+
+      @if (recentBookings().length) {
+        <div class="list">
+          @for (booking of recentBookings(); track booking.idBooking) {
+            <div class="list-row">
+              <span class="avatar-mini">{{ clientName(booking.idClient).slice(0, 1) }}</span>
+              <div class="list-copy">
+                <strong>{{ clientName(booking.idClient) }}</strong>
+                <small>{{ tripLabel(booking.idTrip) }}</small>
+              </div>
+              <span class="money">{{ booking.totalPrice | money }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="mini-empty">
+          <mat-icon>receipt_long</mat-icon>
+          <p>Todavía no hay reservas registradas.</p>
+          <a routerLink="/admin/bookings">Registrar una reserva</a>
+        </div>
+      }
+    </article>
+  </div>
+
+  <div class="quick-grid">
+    @for (action of quickActions; track action.label) {
+      <a class="quick-card" [routerLink]="action.path">
+        <span class="quick-icon"
+          ><mat-icon>{{ action.icon }}</mat-icon></span
+        >
+        <span>
+          <strong>{{ action.label }}</strong>
+          <small>{{ action.description }}</small>
+        </span>
+        <mat-icon class="quick-arrow">arrow_forward</mat-icon>
+      </a>
+    }
+  </div>
+</section>

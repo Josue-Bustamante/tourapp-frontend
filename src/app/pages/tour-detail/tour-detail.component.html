@@ -1,0 +1,273 @@
+@if (loading()) {
+  <div class="container detail-loading">
+    <div class="loading-media"></div>
+    <div class="loading-line"></div>
+    <div class="loading-line short"></div>
+  </div>
+} @else if (notFound() || !tour()) {
+  <div class="container not-found">
+    <span class="not-found-icon"><mat-icon>explore_off</mat-icon></span>
+    <span class="eyebrow">Tour no encontrado</span>
+    <h1>Esta ruta se perdió en el mapa.</h1>
+    <p>
+      El tour que buscas no existe o ya no está disponible. Vuelve al catálogo para encontrar otra
+      experiencia.
+    </p>
+    <a class="btn btn-primary" routerLink="/tours">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al catálogo
+    </a>
+  </div>
+} @else {
+  @if (tour(); as currentTour) {
+    <section class="detail-banner">
+      <img [src]="image()" [alt]="currentTour.nameTour" />
+      <div class="banner-overlay"></div>
+
+      <div class="container banner-content">
+        <nav class="breadcrumb" aria-label="Ruta de navegación">
+          <a routerLink="/">Inicio</a>
+          <mat-icon>chevron_right</mat-icon>
+          <a routerLink="/tours">Tours</a>
+          <mat-icon>chevron_right</mat-icon>
+          <span>{{ currentTour.nameTour }}</span>
+        </nav>
+
+        <div class="banner-badges">
+          @if (currentTour.demo) {
+            <span class="chip chip-glass">Vista demo</span>
+          }
+          <span class="chip chip-glass">
+            <mat-icon>schedule</mat-icon>
+            {{ currentTour.durationHours | duracion }}
+          </span>
+          <span class="chip chip-glass">
+            <mat-icon>place</mat-icon>
+            {{ currentTour.places?.length ?? 0 }} lugares
+          </span>
+        </div>
+
+        <h1>{{ currentTour.nameTour }}</h1>
+        <p class="banner-description">{{ currentTour.description }}</p>
+
+        <div class="banner-meta">
+          <span class="stars">★★★★★</span>
+          <span>4.9 · 128 opiniones</span>
+          <span class="meta-dot"></span>
+          <span><mat-icon>verified</mat-icon> Guías certificados</span>
+          <span class="meta-dot"></span>
+          <span><mat-icon>groups</mat-icon> Grupos pequeños</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="container detail-layout">
+      <main class="detail-main">
+        <section class="content-block">
+          <span class="eyebrow">La experiencia</span>
+          <h2>Lo que vas a vivir.</h2>
+          <p class="lead">{{ currentTour.description }}</p>
+          <p>
+            Salimos temprano para aprovechar la luz y evitar las horas de mayor afluencia. Durante
+            el camino, nuestro guía compartirá historias, datos y pequeñas leyendas que no aparecen
+            en las guías de viaje. Habrá tiempo para fotografías, descansos y para simplemente
+            mirar.
+          </p>
+        </section>
+
+        <section class="content-block">
+          <div class="block-head">
+            <div>
+              <span class="eyebrow">Itinerario</span>
+              <h2>Lugares que visitarás.</h2>
+            </div>
+            <span class="chip chip-sand">{{ currentTour.places?.length ?? 0 }} paradas</span>
+          </div>
+
+          @if (currentTour.places?.length) {
+            <div class="places-list">
+              @for (
+                place of currentTour.places;
+                track place.idPlace ?? place.namePlace;
+                let index = $index
+              ) {
+                <article class="place-row">
+                  <span class="place-number">{{ stopNumber(index) }}</span>
+                  <span class="place-icon"><mat-icon>location_on</mat-icon></span>
+                  <div class="place-copy">
+                    <h3>{{ place.namePlace }}</h3>
+                    <p>
+                      @if (hasEntryFee(place.entryFee)) {
+                        Entrada incluida · {{ place.entryFee | money }}
+                      } @else {
+                        Acceso libre · incluido en la experiencia
+                      }
+                    </p>
+                  </div>
+                  <mat-icon class="place-check">check_circle</mat-icon>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>map</mat-icon>
+              <p>El itinerario detallado se compartirá al confirmar tu reserva.</p>
+            </div>
+          }
+        </section>
+
+        <section class="content-block">
+          <span class="eyebrow">Todo incluido</span>
+          <h2>Pensado para que solo disfrutes.</h2>
+          <div class="included-grid">
+            @for (item of included; track item) {
+              <div class="included-item">
+                <mat-icon>check</mat-icon>
+                <span>{{ item }}</span>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="content-block note-block">
+          <span class="note-icon"><mat-icon>info</mat-icon></span>
+          <div>
+            <h3>Antes de reservar</h3>
+            <p>
+              Lleva ropa cómoda, protector solar y una botella de agua. Si viajas en temporada de
+              lluvias, suma una casaca impermeable. Las salidas pueden ajustarse por condiciones
+              climáticas; en ese caso te ofreceremos una fecha alternativa o el reembolso completo.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="booking-aside">
+        <div class="booking-card">
+          <div class="booking-head">
+            <div>
+              <span class="price-label">Desde</span>
+              <span class="price-value">{{ currentTour.basePrice | money }}</span>
+              <span class="price-unit">/ persona</span>
+            </div>
+            <span class="rating-badge">
+              <span class="stars">★</span>
+              4.9
+            </span>
+          </div>
+
+          <div class="booking-divider"></div>
+
+          <div class="booking-section">
+            <h3><mat-icon>calendar_month</mat-icon> Elige tu salida</h3>
+
+            @if (availableTrips().length) {
+              <div class="date-options">
+                @for (trip of availableTrips(); track trip.idTrip) {
+                  <button
+                    type="button"
+                    class="date-option"
+                    [class.active]="selectedTripId() === trip.idTrip"
+                    (click)="selectedTripId.set(trip.idTrip ?? null)"
+                  >
+                    <span class="date-day">{{ trip.tripDate | fecha }}</span>
+                    <span class="date-time">{{ trip.departureTime | hora }}</span>
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="no-dates">
+                <mat-icon>event_busy</mat-icon>
+                <p>Aún no hay salidas programadas para este tour.</p>
+                <a href="mailto:hola@tourapp.pe?subject=Consulta%20de%20disponibilidad">
+                  Consultar disponibilidad
+                </a>
+              </div>
+            }
+          </div>
+
+          <div class="booking-section">
+            <h3><mat-icon>groups</mat-icon> Viajeros</h3>
+            <div class="travelers-row">
+              <button
+                type="button"
+                aria-label="Quitar viajero"
+                (click)="changeTravelers(-1)"
+                [disabled]="travelers() <= 1"
+              >
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span>{{ travelers() }}</span>
+              <button
+                type="button"
+                aria-label="Agregar viajero"
+                (click)="changeTravelers(1)"
+                [disabled]="travelers() >= 10"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+              <small>Máximo 10 por reserva</small>
+            </div>
+          </div>
+
+          <div class="booking-total">
+            <span>Total estimado</span>
+            <strong>{{ total() | money }}</strong>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-accent reserve-button"
+            [disabled]="!selectedTripId()"
+            (click)="reserve()"
+          >
+            <mat-icon>confirmation_number</mat-icon>
+            Reservar ahora
+          </button>
+
+          <p class="booking-foot">
+            <mat-icon>lock</mat-icon>
+            No se cobra nada en este paso
+          </p>
+
+          <ul class="booking-perks">
+            <li><mat-icon>check_circle</mat-icon> Cancelación gratuita hasta 48 h antes</li>
+            <li><mat-icon>check_circle</mat-icon> Confirmación inmediata</li>
+            <li><mat-icon>check_circle</mat-icon> Pago seguro al confirmar</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <span class="help-icon"><mat-icon>support_agent</mat-icon></span>
+          <div>
+            <strong>¿Tienes dudas?</strong>
+            <p>Escríbenos y te ayudamos a elegir la mejor fecha.</p>
+            <a href="mailto:hola@tourapp.pe">hablar con un asesor</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    @if (related().length) {
+      <section class="related-section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Sigue explorando</span>
+              <h2>También te puede gustar.</h2>
+            </div>
+            <a class="text-link" routerLink="/tours">
+              Ver todo el catálogo
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+          <div class="related-grid">
+            @for (item of related(); track item.idTour) {
+              <app-tour-card [tour]="item"></app-tour-card>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
+}

@@ -1,0 +1,186 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.tour-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  color: inherit;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.tour-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--brand-200);
+  box-shadow: var(--shadow-lg);
+  color: inherit;
+}
+
+.card-media {
+  position: relative;
+  height: 218px;
+  overflow: hidden;
+  background: var(--brand-100);
+}
+
+.card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 36, 30, 0.16) 0%,
+    transparent 38%,
+    rgba(8, 36, 30, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tour-card:hover .card-media img {
+  transform: scale(1.06);
+}
+
+.media-top {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.media-top .chip mat-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+
+.demo-chip {
+  background: rgba(232, 117, 79, 0.9);
+  border-color: transparent;
+}
+
+.media-price {
+  position: absolute;
+  z-index: 2;
+  bottom: 16px;
+  right: 18px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(8, 36, 30, 0.35);
+}
+
+.media-price small {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.86;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 22px 22px 18px;
+}
+
+.places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.place {
+  color: var(--accent-600);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.place + .place::before {
+  content: '·';
+  margin-right: 5px;
+  color: var(--sand-300);
+}
+
+.card-body h3 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.card-body p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.link-label {
+  color: var(--brand-700);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.arrow {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.arrow mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.tour-card:hover .arrow {
+  background: var(--accent-500);
+  color: #fff;
+  transform: translateX(2px);
+}

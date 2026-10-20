@@ -1,0 +1,33 @@
+<a class="tour-card" [routerLink]="['/tours', tour().idTour]">
+  <div class="card-media">
+    <img [src]="image()" [alt]="tour().nameTour" loading="lazy" />
+    <div class="media-top">
+      <span class="chip chip-glass">
+        <mat-icon>schedule</mat-icon>
+        {{ tour().durationHours | duracion }}
+      </span>
+      @if (tour().demo) {
+        <span class="chip chip-glass demo-chip">Demo</span>
+      }
+    </div>
+    <span class="media-price">{{ tour().basePrice | money }} <small>/ persona</small></span>
+  </div>
+
+  <div class="card-body">
+    <div class="places">
+      @for (place of firstPlaces(); track place.idPlace ?? place.namePlace) {
+        <span class="place">{{ place.namePlace }}</span>
+      }
+    </div>
+
+    <h3>{{ tour().nameTour }}</h3>
+    <p>{{ tour().description }}</p>
+
+    <div class="card-footer">
+      <span class="link-label">Ver experiencia</span>
+      <span class="arrow">
+        <mat-icon>arrow_forward</mat-icon>
+      </span>
+    </div>
+  </div>
+</a>

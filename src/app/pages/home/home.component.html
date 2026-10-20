@@ -1,0 +1,318 @@
+<section class="hero">
+  <div class="hero-bg">
+    <img src="img/hero.jpg" alt="Machu Picchu entre montañas al amanecer" />
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grain"></div>
+
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="hero-badge animate-up">
+        <span class="dot"></span>
+        Experiencias curadas en Perú
+      </span>
+
+      <h1 class="animate-up delay-1">
+        El Perú se vive,
+        <em>no se visita.</em>
+      </h1>
+
+      <p class="animate-up delay-2">
+        Rutas diseñadas para mirar más allá del paisaje: historias, sabores y personas que hacen que
+        cada viaje se sienta propio.
+      </p>
+
+      <form
+        class="hero-search animate-up delay-3"
+        (submit)="$event.preventDefault(); searchTours()"
+      >
+        <mat-icon>search</mat-icon>
+        <input
+          type="search"
+          placeholder="¿Qué experiencia buscas?"
+          aria-label="Buscar tours"
+          [value]="search()"
+          (input)="search.set($any($event.target).value)"
+        />
+        <button type="submit" class="btn btn-accent">
+          Explorar
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </form>
+
+      <div class="quick-links animate-up delay-3">
+        <span>Populares:</span>
+        @for (term of quickSearches; track term) {
+          <button type="button" (click)="searchFor(term)">{{ term }}</button>
+        }
+      </div>
+    </div>
+
+    @if (heroTour(); as tour) {
+      <a class="hero-card animate-up delay-2" [routerLink]="['/tours', tour.idTour]">
+        <div class="hero-card-media">
+          <img [src]="imageFor(tour)" [alt]="tour.nameTour" />
+          <span class="chip chip-glass hero-card-tag">
+            <mat-icon>auto_awesome</mat-icon>
+            Experiencia destacada
+          </span>
+        </div>
+        <div class="hero-card-body">
+          <div class="hero-rating">
+            <span class="stars">★★★★★</span>
+            <span>4.9 · 128 opiniones</span>
+          </div>
+          <h3>{{ tour.nameTour }}</h3>
+          <div class="hero-card-meta">
+            <span><mat-icon>schedule</mat-icon> {{ tour.durationHours | duracion }}</span>
+            <span><mat-icon>place</mat-icon> {{ tour.places?.length ?? 0 }} lugares</span>
+          </div>
+          <div class="hero-card-foot">
+            <span class="hero-price">{{ tour.basePrice | money }} <small>/ persona</small></span>
+            <span class="hero-link">Ver tour <mat-icon>arrow_outward</mat-icon></span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+
+  <div class="hero-scroll">
+    <span>Desliza para descubrir</span>
+    <mat-icon>south</mat-icon>
+  </div>
+</section>
+
+<section class="stats-band">
+  <div class="container stats-grid">
+    <div class="stat">
+      <strong>12</strong>
+      <span>destinos curados</span>
+    </div>
+    <div class="stat">
+      <strong>+2,400</strong>
+      <span>viajeros acompañados</span>
+    </div>
+    <div class="stat">
+      <strong>4.9<span>/5</span></strong>
+      <span>valoración promedio</span>
+    </div>
+    <div class="stat">
+      <strong>8</strong>
+      <span>años recorriendo el Perú</span>
+    </div>
+  </div>
+</section>
+
+@if (demoMode()) {
+  <div class="container demo-wrap">
+    <div class="notice">
+      <mat-icon>info</mat-icon>
+      <div>
+        <strong>Vista de demostración</strong>
+        <p>
+          El backend no está disponible o aún no hay tours publicados. Estás viendo un catálogo de
+          ejemplo; al conectar Spring Boot se mostrarán los datos reales.
+        </p>
+      </div>
+    </div>
+  </div>
+}
+
+<section id="destinos" class="section destinations">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Destinos que enamoran</span>
+        <h2>Un país de tres mundos y mil historias.</h2>
+      </div>
+      <div class="head-side">
+        <p>
+          Del aire fino de los Andes al verde profundo de la Amazonía. Elige el escenario; nosotros
+          trazamos el camino.
+        </p>
+        <a class="text-link" routerLink="/tours">
+          Ver todos los tours
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </div>
+    </div>
+
+    <div class="destination-grid">
+      @for (destination of destinations; track destination.name) {
+        <a
+          class="destination-tile"
+          [class.destination-tile--featured]="destination.featured"
+          [routerLink]="['/tours']"
+          [queryParams]="{ q: destination.query }"
+        >
+          <img [src]="destination.image" [alt]="destination.name" loading="lazy" />
+          <span class="tile-shade"></span>
+          <div class="tile-content">
+            <span class="tile-tag">{{ destination.tag }}</span>
+            <h3>{{ destination.name }}</h3>
+            <span class="tile-arrow"><mat-icon>north_east</mat-icon></span>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section featured">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Las más elegidas</span>
+        <h2>Experiencias para empezar a soñar.</h2>
+      </div>
+      <a class="text-link" routerLink="/tours">
+        Explorar catálogo
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    @if (loading()) {
+      <div class="featured-grid">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="skeleton-card">
+            <div class="skeleton-media"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="featured-grid">
+        @for (tour of featuredTours(); track tour.idTour) {
+          <app-tour-card [tour]="tour"></app-tour-card>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<section id="nosotros" class="section about">
+  <div class="container about-grid">
+    <div class="about-media">
+      <img src="img/group.jpg" alt="Viajeros compartiendo una experiencia en Perú" loading="lazy" />
+      <div class="about-badge">
+        <strong>98%</strong>
+        <span>recomendaría TourApp</span>
+      </div>
+      <div class="about-quote">
+        <mat-icon>format_quote</mat-icon>
+        <p>“Viajar es la única cosa que compras y te hace más rico.”</p>
+      </div>
+    </div>
+
+    <div class="about-copy">
+      <span class="eyebrow">Nosotros</span>
+      <h2>Menos prisa.<br /><em>Más encuentros.</em></h2>
+      <p class="lead">
+        Somos un equipo de guías, conductores y viajeros que cree que el mejor turismo es el que se
+        toma su tiempo. Por eso diseñamos grupos pequeños, rutas cuidadas y días con espacio para
+        improvisar.
+      </p>
+
+      <div class="benefit-list">
+        @for (benefit of benefits; track benefit.title) {
+          <div class="benefit">
+            <span class="benefit-icon"
+              ><mat-icon>{{ benefit.icon }}</mat-icon></span
+            >
+            <div>
+              <h3>{{ benefit.title }}</h3>
+              <p>{{ benefit.text }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <a class="btn btn-primary" routerLink="/tours">
+        Conoce nuestras rutas
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section process">
+  <div class="container">
+    <div class="section-head section-head--center">
+      <span class="eyebrow">Así de simple</span>
+      <h2>Tu viaje, en tres pasos.</h2>
+      <p>Sin formularios eternos ni letra pequeña. Solo tú, el destino y nosotros.</p>
+    </div>
+
+    <div class="steps-grid">
+      @for (step of steps; track step.number) {
+        <article class="step-card">
+          <span class="step-number">{{ step.number }}</span>
+          <span class="step-icon"
+            ><mat-icon>{{ step.icon }}</mat-icon></span
+          >
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section testimonials">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Voces del camino</span>
+        <h2>Historias que vuelven a contarse.</h2>
+      </div>
+      <div class="rating-summary">
+        <span class="stars">★★★★★</span>
+        <div>
+          <strong>4.9 de 5</strong>
+          <small>Basado en 128 opiniones verificadas</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-grid">
+      @for (testimonial of testimonials; track testimonial.name) {
+        <figure class="testimonial-card">
+          <span class="quote-mark">“</span>
+          <blockquote>{{ testimonial.quote }}</blockquote>
+          <figcaption>
+            <span class="person-avatar">{{ testimonial.initials }}</span>
+            <span>
+              <strong>{{ testimonial.name }}</strong>
+              <small>{{ testimonial.detail }}</small>
+            </span>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <img src="img/andes.jpg" alt="" aria-hidden="true" />
+      <div class="cta-overlay"></div>
+      <div class="cta-content">
+        <span class="eyebrow eyebrow--light">Tu próxima historia</span>
+        <h2>El mejor momento para viajar<br />es cuando decides hacerlo.</h2>
+        <p>Cuéntanos qué te gustaría vivir y armamos una experiencia a tu medida.</p>
+        <div class="cta-actions">
+          <a class="btn btn-accent btn-lg" routerLink="/tours">
+            Encuentra tu tour
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+          <a class="btn btn-ghost-light btn-lg" href="mailto:hola@tourapp.pe">
+            <mat-icon>mail</mat-icon>
+            Escríbenos
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

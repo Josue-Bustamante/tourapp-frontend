@@ -1,0 +1,176 @@
+<section class="crud-page">
+  <header class="page-head">
+    <div class="page-title">
+      <span class="title-icon">
+        <mat-icon>{{ icon() }}</mat-icon>
+      </span>
+      <div>
+        <h1>{{ title() }}</h1>
+        @if (subtitle()) {
+          <p>{{ subtitle() }}</p>
+        }
+      </div>
+    </div>
+
+    <button mat-flat-button class="add-button" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      {{ addLabel() }}
+    </button>
+  </header>
+
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>{{ searchPlaceholder() }}</mat-label>
+      <input matInput [value]="filter()" (input)="applyFilter($event)" />
+      @if (filter()) {
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Limpiar búsqueda"
+          (click)="clearFilter()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <span class="count-chip">{{ filteredRows().length }} registros</span>
+
+    <span class="spacer"></span>
+
+    <button mat-stroked-button class="refresh-button" (click)="load()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="notice notice--error">
+      <mat-icon>cloud_off</mat-icon>
+      <div>
+        <strong>No se pudieron cargar los datos</strong>
+        <p>{{ error() }}</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="load()">Reintentar</button>
+    </div>
+  }
+
+  <div class="table-card">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    @if (!loading() && filteredRows().length === 0) {
+      <div class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <h3>{{ error() ? 'No se pudieron cargar los datos' : emptyTitle() }}</h3>
+        <p>
+          {{ error() ? 'Revisa la conexión con el backend e inténtalo nuevamente.' : emptyText() }}
+        </p>
+        @if (!error()) {
+          <button mat-flat-button class="add-button" (click)="openCreate()">
+            <mat-icon>add</mat-icon>
+            {{ addLabel() }}
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table mat-table [dataSource]="dataSource" matSort class="crud-table">
+          @for (column of columns(); track column.key) {
+            <ng-container [matColumnDef]="column.key">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header
+                [disabled]="isDisabledSort(column)"
+              >
+                {{ column.label }}
+              </th>
+              <td mat-cell *matCellDef="let row" [class.cell-truncate]="column.type === 'truncate'">
+                @switch (column.type) {
+                  @case ('currency') {
+                    <span class="money">{{ valueOf(column, row) | money }}</span>
+                  }
+                  @case ('date') {
+                    {{ valueOf(column, row) | fecha }}
+                  }
+                  @case ('time') {
+                    {{ valueOf(column, row) | hora }}
+                  }
+                  @case ('datetime') {
+                    {{ valueOf(column, row) | fechaHora }}
+                  }
+                  @case ('boolean') {
+                    <span
+                      class="pill"
+                      [class.pill-success]="valueOf(column, row)"
+                      [class.pill-muted]="!valueOf(column, row)"
+                    >
+                      {{ valueOf(column, row) ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  }
+                  @case ('chips') {
+                    @if (asArray(valueOf(column, row)).length) {
+                      <div class="chips-cell">
+                        @for (item of asArray(valueOf(column, row)); track $index) {
+                          <span class="chip">{{ chipText(column, item) }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="muted">—</span>
+                    }
+                  }
+                  @case ('truncate') {
+                    <span class="truncate-text" [matTooltip]="valueOf(column, row) ?? ''">
+                      {{ valueOf(column, row) ?? '—' }}
+                    </span>
+                  }
+                  @default {
+                    {{ valueOf(column, row) ?? '—' }}
+                  }
+                }
+              </td>
+            </ng-container>
+          }
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-head">Acciones</th>
+            <td mat-cell *matCellDef="let row" class="actions-cell">
+              <button
+                mat-icon-button
+                class="action-edit"
+                matTooltip="Editar"
+                aria-label="Editar registro"
+                (click)="openEdit(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                class="action-delete"
+                matTooltip="Eliminar"
+                aria-label="Eliminar registro"
+                (click)="remove(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSizeOptions]="[8, 15, 30, 50]"
+        [pageSize]="8"
+        showFirstLastButtons
+        aria-label="Seleccionar página"
+      ></mat-paginator>
+    }
+  </div>
+</section>
